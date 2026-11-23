@@ -18,9 +18,10 @@ from typing import Optional, List, Tuple, Dict, Any
 
 if sys.version_info >= (3, 12):
     try:
-        asyncio.get_event_loop()
+        asyncio.get_running_loop()
     except RuntimeError:
-        asyncio.set_event_loop(asyncio.new_event_loop())
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
 
 DATA_DIR = os.path.dirname(os.path.abspath(__file__))
 ENV_FILE = os.path.join(DATA_DIR, ".env")
