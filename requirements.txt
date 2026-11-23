@@ -1,0 +1,7 @@
+pyaes==1.6.1
+pymediainfo-pyrofork==6.0.2
+pyrofork==2.3.69
+PySocks==1.7.1
+python-dotenv==1.2.4
+TgCrypto==1.2.5
+yt-dlp==2026.10.26

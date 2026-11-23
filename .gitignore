@@ -1,0 +1,25 @@
+# Secrets, Sessions & User Data
+.env
+.env.*
+auth_users.json
+*.session
+*.session-journal
+*.pem
+*.key
+
+# Virtual Environment & Python Cache
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# Tools & Downloads (Auto-installed via install.sh)
+tools/
+*.zip
+downloads/
+temp/
+*.mp4
+*.m4a
+*.mkv
+*.ts
+*.log
