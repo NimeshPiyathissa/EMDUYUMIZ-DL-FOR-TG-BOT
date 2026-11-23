@@ -1,7 +1,9 @@
 # Secrets, Sessions & User Data
 .env
 .env.*
+!.env.example
 auth_users.json
+!.auth_users.json.example
 *.session
 *.session-journal
 *.pem
@@ -10,16 +12,29 @@ auth_users.json
 # Virtual Environment & Python Cache
 venv/
 .venv/
+env/
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
 
-# Tools & Downloads (Auto-installed via install.sh)
+# Tools, Temp & Downloads (Auto-installed via install.sh)
 tools/
-*.zip
 downloads/
 temp/
+tg_mpd_*/
+*.zip
+*.tar.gz
+
+# Media & Log Files
 *.mp4
 *.m4a
 *.mkv
 *.ts
 *.log
+
+# Operating System & IDE Files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

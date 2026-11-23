@@ -21,10 +21,11 @@ echo "[3/5] Setting up Python virtual environment..."
 python3 -m venv venv
 ./venv/bin/pip install --upgrade pip
 ./venv/bin/pip install -r requirements.txt
+sudo ln -sf "$(pwd)/venv/bin/yt-dlp" /usr/local/bin/yt-dlp
 
 echo "[4/5] Preparing configuration files..."
 if [ ! -f ".env" ] && [ -f ".env.example" ]; then
-    cp .env.example .ent
+    cp .env.example .env
 fi
 if [ ! -f "auth_users.json" ] && [ -f "auth_users.json.example" ]; then
     cp auth_users.json.example auth_users.json
@@ -41,6 +42,7 @@ After=network.target
 Type=simple
 User=root
 WorkingDirectory=$PROJECT_DIR
+Environment=\"PATH=$PROJECT_DIR/venv/bin:/usr/local/bin:/usr/bin:/bin\"
 ExecStart=$PROJECT_DIR/venv/bin/python3 $PROJECT_DIR/edumix_v4.py
 Restart=always
 RestartSec=5
@@ -52,4 +54,3 @@ SERVICE"
 sudo systemctl daemon-reload
 sudo systemctl enable edumix
 echo "Done! Run: nano .env && nano auth_users.json && systemctl start edumix"
-
