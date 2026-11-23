@@ -22,9 +22,16 @@ if sys.version_info >= (3, 12):
     except RuntimeError:
         asyncio.set_event_loop(asyncio.new_event_loop())
 
+DATA_DIR = os.path.dirname(os.path.abspath(__file__))
+ENV_FILE = os.path.join(DATA_DIR, ".env")
+AUTH_STORE_FILE = os.path.join(DATA_DIR, "auth_users.json")
+
 try:
     from dotenv import load_dotenv
-    load_dotenv()
+    if os.path.isfile(ENV_FILE):
+        load_dotenv(dotenv_path=ENV_FILE)
+    else:
+        load_dotenv()
 except ImportError:
     pass
 
@@ -47,26 +54,38 @@ except ImportError:
     )
     sys.exit(1)
 
-API_ID = int(os.environ.get("API_ID"))
-API_HASH = os.environ.get("API_HASH")
-BOT_TOKEN = os.environ.get("BOT_TOKEN")
-ADMIN_IDS_RAW = os.environ.get("ADMIN_IDS", "").strip() or os.environ.get("ADMIN_ID", "").strip()
+def resolve_tool_path(name: str, preferred: str) -> str:
+    if shutil.which(preferred) or (os.path.isfile(preferred) and os.access(preferred, os.X_OK)):
+        return preferred
+    venv_tool = os.path.join(sys.prefix, "bin", name)
+    if os.path.isfile(venv_tool) and os.access(venv_tool, os.X_OK):
+        return venv_tool
+    local_bin = os.path.join("/usr/local/bin", name)
+    if os.path.isfile(local_bin) and os.access(local_bin, os.X_OK):
+        return local_bin
+    bento_bin = os.path.join("/opt/bento4", name)
+    if os.path.isfile(bento_bin) and os.access(bento_bin, os.X_OK):
+        return bento_bin
+    return preferred
+
+API_ID_RAW = (os.environ.get("API_ID") or "").strip()
+API_ID = int(API_ID_RAW) if API_ID_RAW.isdigit() else 0
+API_HASH = (os.environ.get("API_HASH") or "").strip()
+BOT_TOKEN = (os.environ.get("BOT_TOKEN") or "").strip()
+ADMIN_IDS_RAW = (os.environ.get("ADMIN_IDS") or os.environ.get("ADMIN_ID") or "").strip()
 ADMIN_IDS: List[int] = [
     int(x.strip()) for x in ADMIN_IDS_RAW.split(",") if x.strip().isdigit()
 ]
-AUTH_USERS_RAW = os.environ.get("AUTH_USERS", "").strip()
+AUTH_USERS_RAW = (os.environ.get("AUTH_USERS") or "").strip()
 
-YTDLP_PATH = os.environ.get("YTDLP_PATH", "yt-dlp")
-MP4DECRYPT_PATH = os.environ.get("MP4DECRYPT_PATH", "mp4decrypt")
+YTDLP_PATH = resolve_tool_path("yt-dlp", os.environ.get("YTDLP_PATH", "yt-dlp"))
+MP4DECRYPT_PATH = resolve_tool_path("mp4decrypt", os.environ.get("MP4DECRYPT_PATH", "mp4decrypt"))
 
 BROWSER_UA = os.environ.get(
     "BROWSER_UA",
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
 )
-
-DATA_DIR = os.path.dirname(os.path.abspath(__file__))
-AUTH_STORE_FILE = os.path.join(DATA_DIR, "auth_users.json")
 
 def load_auth_users() -> set[int]:
     users: set[int] = set()
@@ -480,7 +499,7 @@ async def ffmpeg_merge(video: str, audio: Optional[str], output: str) -> Tuple[b
 
 def missing_tools() -> List[str]:
     tools = (("yt-dlp", YTDLP_PATH), ("mp4decrypt", MP4DECRYPT_PATH), ("ffmpeg", "ffmpeg"), ("ffprobe", "ffprobe"))
-    return [n for n, p in tools if not (shutil.which(p) or os.path.isfile(p))]
+    return [n for n, p in tools if not (shutil.which(p) or (os.path.isfile(p) and os.access(p, os.X_OK)))]
 
 
 async def extract_duration(video_path: str) -> int:
